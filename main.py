@@ -8,32 +8,23 @@ def parse(inputValue):
     return [s.strip() for s in str(inputValue).split(',')]
 
 def main():
-    wb = load_workbook(filename='Book1.xlsx')
+    wb_filename = 'Book1.xlsx'
+    wb = load_workbook(filename=wb_filename)
     ws_schedule = wb['Schedule']
     ws_subjects = wb['Subjects']
+    
+    tutorSubjects = {row[0].value:parse(row[1].value) for row in ws_subjects.rows}
+    
+    ws_schedule.insert_cols(2)
+    wb.save(wb_filename)
+    for row in ws_schedule.iter_rows():
+        tutors = parse(row[2].value)
+        outputSet = set()
+        for t in tutors:
+            outputSet.update(tutorSubjects[t])
+        row[1].value = ', '.join(sorted(outputSet))
 
-    schedule = {}
-    i=1
-    curVal = ws_schedule['A'+str(i)].value
-    while curVal:
-        schedule[curVal] = parse(ws_schedule['B'+str(i)].value)
-
-        i+=1
-        curVal = ws_schedule['A'+str(i)].value
-    for item in schedule.items():
-        print(item)
-
-    print('\n')
-
-    subjects = {}
-    i=1
-    curVal = ws_subjects['A'+str(i)].value
-    while curVal:
-        subjects[curVal] = parse(ws_subjects['B'+str(i)].value)
-        i+=1
-        curVal = ws_subjects['A'+str(i)].value
-    for item in subjects.items():
-        print(item)
+    wb.save(wb_filename)
 
 
 if __name__ == '__main__':
