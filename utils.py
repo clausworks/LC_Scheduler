@@ -5,6 +5,7 @@ def parse_csv_list(inputValue):
     '''
     return [s.strip() for s in str(inputValue).split(',')]
 
+
 def get_all_subjects(tutors):
     '''
     Returns a sorted list of all subjects tutored by the given tutors.
@@ -13,6 +14,7 @@ def get_all_subjects(tutors):
     for tutor in tutors:
         subjects.update(tutor.subjects)
     return sorted(subjects)
+
 
 def get_all_shifts(tutors):
     '''
