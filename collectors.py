@@ -3,22 +3,47 @@ from utils import parse_csv_list
 def read_name_shifts(ws):
     '''
     Reads data from the given Excel worksheet in the format names vs. shifts.
-    Shifts are denoted by an 'X' in the appropriate column.
-    Returns a dictionary in the format <name: shifts>
-    '''
-    # 0-based column and row values
-    NAME_COL = 0
-    FIRST_DATA_ROW = 1;
+    The name is gathered from a cell in column A containing "(ST00" where *
+    matches any character(s). The cell is in the format "Last, First (ST00*)".
 
-    shift_names = [cell.value for cell in ws[1]]  # Get first row for shift names
-    shift_names = shift_names[1:]  # Chop off empty cell (A1)
+    A shift row is denoted by the text "drop-in" in column A. The format is
+    as follows:
+        A: indicates subject
+        B: start time (HH:MM *M) Monday
+        C: end time (HH:MM *M) Monday
+        D,E,F,G,H,I,J,K Tues-Fri in like manner
+
+    This function returns a dict of {name:shifts} (with format string:list).
+    '''
+
+    # 0-based columns
+    NAME = 0
+    SHIFT_TYPE = 0
+    MON_1 = 1
+    MON_2 = 2
+    TUE_1 = 3
+    TUE_2 = 4
+    WED_1 = 5
+    WED_2 = 6
+    THU_1 = 7
+    THU_2 = 8
+    FRI_1 = 9
+    FRI_2 = 10
 
     data = {}
-    for row in ws.iter_rows(min_row=FIRST_DATA_ROW+1, values_only=True):
-        name = row[NAME_COL]
-        shifts = [shift_names[i] for i in range(3) if row[i+1]]
-        data[name] = shifts
-    return data
+    for row in ws.iter_rows(values_only=True):
+        # only cells with names have this, e.g. (ST0045)
+        index = -1
+        try:
+            index = str(row[0]).upper().index('(ST00')
+        except ValueError:
+            continue
+        else:
+            name_string = str(row[0])[:index]  # strip off number
+            names = name_string.split(',')
+            names = [name.strip() for name in names]
+            print('Tutor:',names[1], names[0])
+    # return data
 
 
 def read_name_subjects(ws):
@@ -52,4 +77,4 @@ def read_shift_names(ws):
     SHIFT_2_ROW = 2
     SHIFT_3_ROW = 3
 
-    # TODO finish this
+    #
