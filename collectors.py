@@ -35,3 +35,21 @@ def read_name_subjects(ws):
         subjects = parse_csv_list(row[SUBJECTS_COL])
         data[name] = subjects
     return data
+
+
+def read_shift_names(ws):
+    '''
+    Reads data from the given excel worksheet in the format name vs. shifts.
+    There are four columns for MTWR. Each cell contains the names of tutors
+    who are working that shift on that day.
+    '''
+    # 0-based columns and rows
+    MON_COL = 1
+    TUE_COL = 2
+    WED_COL = 3
+    THU_COL = 4
+    SHIFT_1_ROW = 1
+    SHIFT_2_ROW = 2
+    SHIFT_3_ROW = 3
+
+    # TODO finish this
