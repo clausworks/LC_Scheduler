@@ -7,6 +7,7 @@ class Tutor:
     lname: str
     shifts: list
     subjects: list = None
+    # is_drop_in: bool = True  # TODO: implement this
 
     def __str__(self):
         return '{} {}'.format(self.fname, self.lname)
@@ -29,7 +30,7 @@ class Shift:
 
     def __str__(self):
         return '{} {}'.format(
-            self.name[-1],
+            self.name,
             self.day)
 
 # @dataclass

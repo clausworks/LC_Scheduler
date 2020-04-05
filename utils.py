@@ -47,7 +47,6 @@ def get_all_subjects_dict(tutors):
     # Convert sets to lists and sort.
     for k,v in all_subjects.items():
         all_subjects[k] = sorted(list(v))
-        print(k,all_subjects[k])
     return all_subjects
 
 

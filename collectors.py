@@ -42,48 +42,61 @@ def read_name_shifts(ws):
         # Shift cells begin with a row that includes "Drop-in", e.g:
         #   - "Drop-in Math Shift 2"
         #   - "Drop-in Shift 1"
-        elif ('drop' in string0
-            and 'in' in string0
-            and 'shift' in string0):
-            # Get shift number.
+        elif 'drop' in string0 and 'in' in string0:
             pattern = r'shift [1-3]'  # NOTE: Shifts must be numbered 1-3
-            span = re.search(pattern, string0).span()
-            shift_num = string0[span[0]:span[1]][-1]
-            # print(cur_tutor_name)
-            # print(row[:10],end='\n\n')
-            inWriting = True if 'writing' in string0 else False
-            # print(row_num)
-            if row[1] and row[2]:
-                new_shift = Shift(Shift.MONDAY,'Shift '+shift_num, inWriting)
-                if new_shift in data[cur_tutor_name]:
-                    print('Found duplicate:')
-                    print(row_num,'-',new_shift)
-                data[cur_tutor_name].append(new_shift)
-            if row[3] and row[4]:
-                new_shift = Shift(Shift.TUESDAY,'Shift '+shift_num, inWriting)
-                if new_shift in data[cur_tutor_name]:
-                    print('Found duplicate:')
-                    print(row_num,'-',new_shift)
-                data[cur_tutor_name].append(new_shift)
-            if row[5] and row[6]:
-                new_shift = Shift(Shift.WEDNESDAY,'Shift '+shift_num, inWriting)
-                if new_shift in data[cur_tutor_name]:
-                    print('Found duplicate:')
-                    print(row_num,'-',new_shift)
-                data[cur_tutor_name].append(new_shift)
-            if row[7] and row[8]:
-                new_shift = Shift(Shift.THURSDAY,'Shift '+shift_num, inWriting)
-                if new_shift in data[cur_tutor_name]:
-                    print('Found duplicate:')
-                    print(row_num,'-',new_shift)
-                data[cur_tutor_name].append(new_shift)
-            if row[9] and row[10]:
-                new_shift = Shift(Shift.FRIDAY,'Shift '+shift_num, inWriting)
-                if new_shift in data[cur_tutor_name]:
-                    print('Found duplicate:')
-                    print(row_num,'-',new_shift)
-                data[cur_tutor_name].append(new_shift)
-            # TODO: detect duplicates
+            if re.search(pattern, string0):
+                span = re.search(pattern, string0).span()
+                # Get shift number.
+                shift_num = string0[span[0]:span[1]][-1]
+                # print(cur_tutor_name)
+                # print(row[:10],end='\n\n')
+                inWriting = True if 'writing' in string0 else False
+                duplicate_shifts = []
+                if row[1] and row[2]:
+                    new_shift = Shift(Shift.MONDAY,'Shift '+shift_num, inWriting)
+                    if new_shift in data[cur_tutor_name]:
+                        duplicate_shifts.append(new_shift.name
+                            + ' (' + new_shift.day + ')'
+                            + 'in row number ' + str(row_num + 1))
+                    data[cur_tutor_name].append(new_shift)
+                if row[3] and row[4]:
+                    new_shift = Shift(Shift.TUESDAY,'Shift '+shift_num, inWriting)
+                    if new_shift in data[cur_tutor_name]:
+                        duplicate_shifts.append(new_shift.name
+                            + ' (' + new_shift.day + ')'
+                            + 'in row number ' + str(row_num + 1))
+                    data[cur_tutor_name].append(new_shift)
+                if row[5] and row[6]:
+                    new_shift = Shift(Shift.WEDNESDAY,'Shift '+shift_num, inWriting)
+                    if new_shift in data[cur_tutor_name]:
+                        duplicate_shifts.append(new_shift.name
+                            + ' (' + new_shift.day + ')'
+                            + 'in row number ' + str(row_num + 1))
+                    data[cur_tutor_name].append(new_shift)
+                if row[7] and row[8]:
+                    new_shift = Shift(Shift.THURSDAY,'Shift '+shift_num, inWriting)
+                    if new_shift in data[cur_tutor_name]:
+                        duplicate_shifts.append(new_shift.name
+                            + ' (' + new_shift.day + ')'
+                            + 'in row number ' + str(row_num + 1))
+                    data[cur_tutor_name].append(new_shift)
+                if row[9] and row[10]:
+                    new_shift = Shift(Shift.FRIDAY,'Shift '+shift_num, inWriting)
+                    if new_shift in data[cur_tutor_name]:
+                        duplicate_shifts.append(new_shift.name
+                            + ' (' + new_shift.day + ')'
+                            + 'in row number ' + str(row_num + 1))
+                    data[cur_tutor_name].append(new_shift)
+                if duplicate_shifts:
+                    err_file = open('ERRORS.txt', 'a')
+                    print('Duplicate shifts found for ', end='', file=err_file)
+                    print(cur_tutor_name[0], ', ', cur_tutor_name[1], sep='', file=err_file)
+                    for i,cur_shift in enumerate(duplicate_shifts):
+                        print('\t', i+1, ': ',
+                            cur_shift,
+                            sep='', file=err_file)
+                    print('',file=err_file)
+                    err_file.close()
 
     return data
 

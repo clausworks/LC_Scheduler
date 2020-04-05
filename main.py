@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from openpyxl import load_workbook, Workbook
 from openpyxl.utils import get_column_letter
 from tutor import Tutor
@@ -9,14 +10,27 @@ def main():
     wb_filename = 'schedule.xlsx'
     wb = load_workbook(filename=wb_filename, read_only=True)
 
+    err_file = open('ERRORS.txt', 'w')  # Clear/create error file.
+
     # Read data into dictionaries.
     name_shifts = read_name_shifts(wb['Tutor Schedule'])
     name_subjects = read_name_subjects(wb['Subjects'])
 
+    err_output = []
     for name in name_subjects:
         if name not in name_shifts:
-            print(name,"'s schedule can't be found.", sep='')
-    # TODO: Check tutor names both ways for consistency.
+            err_output.append(name)
+            print('MISSING NAME: ', name)
+    if err_output:
+        err_file = open('ERRORS.txt', 'a')
+        print('The following tutors have subjects associated with their names', file=err_file)
+        print('but they do not have any shifts associated with their names:', file=err_file)
+        for i,tutor_name in enumerate(err_output):
+            print('\t', i+1, ': ',
+                tutor_name[0],', ',tutor_name[1],
+                sep='', file=err_file)
+        print('',file=err_file)
+        err_file.close()
 
     # Generate tutor objects from data dictionaries.
     tutors = []
@@ -26,28 +40,50 @@ def main():
                       shifts=name_shifts[name])
         tutors.append(tutor)
 
-    # writing_tutors = get_writing_tutors(tutors)
+    # Note: Writing tutors don't have subjects.
+    writing_tutors = get_writing_tutors(tutors)
+
+    # Update GT/Math tutors with their subjects.
+    err_output = []
     nonwriting_tutors = get_nonwriting_tutors(tutors)
     for tutor in nonwriting_tutors:
         cur_name = (tutor.lname,tutor.fname)
         if cur_name in name_subjects:
             tutor.subjects = name_subjects[cur_name]
         else:
-            pass  # FIXME: add further error checking?
+            # No subjects listed for this tutor.
+            err_output.append(tutor.lname + ', ' + tutor.fname)
+    if err_output:
+        err_file = open('ERRORS.txt', 'a')
+        print('The following GT/Math tutors have shifts associated with their names,', file=err_file)
+        print('but they do not have any subjects associated with their names:', file=err_file)
+        for i,tutor_name in enumerate(err_output):
+            print('\t', i+1, ': ',
+                tutor_name,
+                sep='', file=err_file)
+        print('',file=err_file)
+        err_file.close()
 
-    # get_all_subjects_dict(nonwriting_tutors)
-
-    # print('\nWRITING TUTORS')
-    # for tutor in w_tutors:
-    #     print(tutor.fname, tutor.lname)
-    # print('\nNON-WRITING TUTORS')
-    # for tutor in nw_tutors:
-    #     print(tutor.fname, tutor.lname)
-    # print('\nUNCLASSIFIED TUTORS')
-    # for tutor in tutors:
-    #     if tutor not in w_tutors and tutor not in nw_tutors:
-    #         print(tutor.fname, tutor.lname)
-
+    # Log tutors to file.
+    tutor_file = open('TUTORS.txt', 'w')  # Create/overwrite file.
+    print('WRITING TUTORS', file=tutor_file)
+    for tutor in writing_tutors:
+        print('\t', sep='', end='', file=tutor_file)
+        print(tutor.fname, tutor.lname, file=tutor_file)
+    print('\nGT/MATH TUTORS', file=tutor_file)
+    for tutor in nonwriting_tutors:
+        print('\t', sep='', end='', file=tutor_file)
+        print(tutor.fname, tutor.lname, file=tutor_file)
+    print('\nUNCLASSIFIED TUTORS', file=tutor_file)
+    print('These tutors do not have valid shifts associated with their names.', file=tutor_file)
+    print('This could be because they simply do not have any drop-in shifts,', file=tutor_file)
+    print('but it also could be because their drop-in shifts have not been', file=tutor_file)
+    print('updated to the new shift format.', file=tutor_file)
+    for tutor in tutors:
+        if tutor not in writing_tutors and tutor not in nonwriting_tutors:
+            print('\t', sep='', end='', file=tutor_file)
+            print(tutor.fname, tutor.lname, file=tutor_file)
+    tutor_file.close()
 
     # Write to workbook.
     new_wb = Workbook()
