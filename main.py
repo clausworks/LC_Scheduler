@@ -2,7 +2,7 @@ from openpyxl import load_workbook, Workbook
 from openpyxl.utils import get_column_letter
 from tutor import Tutor
 from collectors import read_name_shifts, read_name_subjects
-from generators import write_shift_names, write_shift_subjects
+from generators import write_shift_names, write_shift_subjects, write_subject_names
 from utils import get_writing_tutors, get_nonwriting_tutors, get_all_subjects_dict
 
 def main():
@@ -56,9 +56,13 @@ def main():
     new_wb.active.title = ws_gtma_name  # Rename default new sheet.
     write_shift_names(new_wb[ws_gtma_name], nonwriting_tutors)
 
-    ws_gtma_subj_name = 'GT & Math (by Subject)'
-    new_wb.create_sheet(ws_gtma_subj_name)
-    write_shift_subjects(new_wb[ws_gtma_subj_name], nonwriting_tutors)
+    ws_gtma_subj_sched_name = 'GT & Math (by Subject)'
+    new_wb.create_sheet(ws_gtma_subj_sched_name)
+    write_shift_subjects(new_wb[ws_gtma_subj_sched_name], nonwriting_tutors)
+
+    ws_subjects_name = 'Subjects & Tutors'
+    new_wb.create_sheet(ws_subjects_name)
+    write_subject_names(new_wb[ws_subjects_name], nonwriting_tutors)
 
     new_wb.save('GENERATED.xlsx')
     print('Done.')

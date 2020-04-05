@@ -2,6 +2,46 @@ from utils import get_all_shifts, get_all_subjects_dict
 from tutor import Shift
 from openpyxl.styles import Font, Alignment
 
+
+def write_shift_names(ws, tutors):
+    # Generate headers.
+    all_shifts = get_all_shifts(tutors)
+    for i,shift in enumerate(all_shifts):
+        ws.cell(row=i+2, column=1).value = shift
+        ws.cell(row=i+2, column=1).font = Font(bold=True)
+        ws.cell(row=i+2, column=1).alignment = Alignment(horizontal='center', vertical='center')
+    days = Shift.DAYS
+    for j,day in enumerate(days):
+        ws.cell(row=1, column=j+2).value = day
+        ws.cell(row=1, column=j+2).font = Font(bold=True)
+        ws.cell(row=1, column=j+2).alignment = Alignment(horizontal='center', vertical='center')
+    ws.row_dimensions[1].width = 10
+
+
+    # Place names.
+    for i,cur_shift in enumerate(all_shifts):
+        for j,cur_day in enumerate(days):
+            # Format cells.
+            ws.cell(row=i+2, column=j+2).alignment = Alignment(wrapText=True,
+                                                     horizontal='center',
+                                                     vertical='center')
+            # FIXME: adjust width too
+            # Place text.
+            for tutor in tutors:
+                for tutor_shift in tutor.shifts:
+                    if cur_shift == tutor_shift.name and cur_day == tutor_shift.day:
+                        if (tutor.fname + ' ' + tutor.lname[:1]) in str(ws.cell(row=i+2, column=j+2).value):
+                            print('Duplicate:', tutor.fname + ' ' + tutor.lname[:1])
+                            for x in tutor.shifts:
+                                print(x)
+                        if ws.cell(row=i+2, column=j+2).value:
+                            ws.cell(row=i+2, column=j+2).value += (tutor.fname + ' '
+                                    + tutor.lname[:1] + '.\n')
+                        else:
+                            ws.cell(row=i+2, column=j+2).value = (tutor.fname + ' '
+                                    + tutor.lname[:1] + '.\n')
+
+
 def write_shift_subjects(ws, tutors):
     '''
     Generates a shifts vs. names table in the given worksheet
@@ -55,47 +95,22 @@ def write_shift_subjects(ws, tutors):
                                     row[j].value = 'X'
 
 
-    # Write data
-    # for tutor in tutors:
-    #     for i,shift in enumerate(shifts):
-    #         for j,subject in enumerate(subjects):
-    #             if shift in tutor.shifts and subject in tutor.subjects:
-    #                 ws.cell(row=i+2, column=j+2).value = 'X'
+def write_subject_names(ws, tutors):
+    all_subjects = get_all_subjects_dict(tutors)
 
-def write_shift_names(ws, tutors):
-    # Generate headers.
-    all_shifts = get_all_shifts(tutors)
-    for i,shift in enumerate(all_shifts):
-        ws.cell(row=i+2, column=1).value = shift
-        ws.cell(row=i+2, column=1).font = Font(bold=True)
-        ws.cell(row=i+2, column=1).alignment = Alignment(horizontal='center', vertical='center')
-    days = Shift.DAYS
-    for j,day in enumerate(days):
-        ws.cell(row=1, column=j+2).value = day
-        ws.cell(row=1, column=j+2).font = Font(bold=True)
-        ws.cell(row=1, column=j+2).alignment = Alignment(horizontal='center', vertical='center')
-    ws.row_dimensions[1].width = 10
-
-
-    # Place names.
-    for i,cur_shift in enumerate(all_shifts):
-        for j,cur_day in enumerate(days):
-            # Format cells.
-            ws.cell(row=i+2, column=j+2).alignment = Alignment(wrapText=True,
-                                                     horizontal='center',
-                                                     vertical='center')
-            # FIXME: adjust width too
-            # Place text.
+    i=1
+    for subj_area,nums in all_subjects.items():
+        ws.cell(row=i, column=1).value = subj_area
+        for cur_num in nums:
+            ws.cell(row=i, column=2).value = cur_num
+            # TODO: Write this to a list and sort the list before writing to cell.
             for tutor in tutors:
-                for tutor_shift in tutor.shifts:
-                    if cur_shift == tutor_shift.name and cur_day == tutor_shift.day:
-                        if (tutor.fname + ' ' + tutor.lname[:1]) in str(ws.cell(row=i+2, column=j+2).value):
-                            print('Duplicate:', tutor.fname + ' ' + tutor.lname[:1])
-                            for x in tutor.shifts:
-                                print(x)
-                        if ws.cell(row=i+2, column=j+2).value:
-                            ws.cell(row=i+2, column=j+2).value += (tutor.fname + ' '
-                                    + tutor.lname[:1] + '.\n')
-                        else:
-                            ws.cell(row=i+2, column=j+2).value = (tutor.fname + ' '
-                                    + tutor.lname[:1] + '.\n')
+                if tutor.subjects:
+                    for tutor_subj in tutor.subjects:
+                        if (tutor_subj.name == subj_area
+                            and tutor_subj.number == cur_num):
+                            if ws.cell(row=i, column=3).value == None:
+                                ws.cell(row=i, column=3).value = str(tutor)
+                            else:
+                                ws.cell(row=i, column=3).value += ', ' + str(tutor)
+            i += 1
