@@ -26,7 +26,6 @@ def write_shift_subjects(ws, tutors):
     for subj_area,nums in all_subjects.items():
         ws.cell(row=i, column=1).value = subj_area
         for m,cur_num in enumerate(nums):
-            if cur_num == 'None': cur_num = '(All)'
             ws.cell(row=i, column=2).value = cur_num
             i += 1
 

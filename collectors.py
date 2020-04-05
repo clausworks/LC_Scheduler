@@ -109,9 +109,14 @@ def read_name_subjects(ws):
             name = last_valid_name
         subject_area = row[1]
         numbers = parse_csv_list(row[2])
+        if subject_area == "DFST":
+            print(numbers)
         data[name] = []
-        for cur_number in numbers:
-            data[name].append(Subject(subject_area, cur_number))
+        if numbers:
+            for cur_number in numbers:
+                data[name].append(Subject(subject_area, cur_number))
+        else:
+            data[name] = [Subject(subject_area, '(All)')]  # No numbers recorded
     return data
 
 
