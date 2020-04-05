@@ -3,7 +3,11 @@ def parse_csv_list(inputValue):
     Takes a comma-separated list (any values) and returns the
     individual items as a list (converts to string first)
     '''
-    return [s.strip() for s in str(inputValue).split(',')]
+    values = [s.strip() for s in str(inputValue).split(',')]
+    if values == ['None']:
+        return None
+    else:
+        return values
 
 def get_writing_tutors(tutors):
     writing_tutors = []

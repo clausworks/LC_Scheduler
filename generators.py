@@ -13,26 +13,31 @@ def write_shift_subjects(ws, tutors):
 
     # Write header column (cell coordinates: row=i,col=j)
 
-    # Write data.
-    j = 2
+    # Write header at top.
+    j = 3 # Column index for current cell.
     for cur_day in Shift.DAYS:
         ws.cell(row=1, column=j).value = cur_day  # DAY
         for cur_shift in all_shifts:
             ws.cell(row=2, column=j).value = cur_shift  # Shift N
             j += 1
-    # for subj_area,nums in all_subjects.items():
-    #     ws.cell(row=1, column=j).value = subj_area  # XXXX
-    #     for cur_num in nums:
-    #         ws.cell(row=2, column=j).value = cur_num  # ###
-    #         j += 1
+
+    # Write header on left side.
     i = 3  # Row index for current subject
     for subj_area,nums in all_subjects.items():
+        ws.cell(row=i, column=1).value = subj_area
         for m,cur_num in enumerate(nums):
-            if cur_num == 'None': cur_num = '(All)'
-            ws.cell(row=i, column=1).value = subj_area + ' ' + cur_num  # XXXX ###
+            ws.cell(row=i, column=2).value = cur_num
             i += 1
 
+    # Write data.
+    last_valid_subj_area = None
     for i,row in enumerate(ws.iter_rows()):
+        if row[0].value:
+            cur_subj_area = row[0].value
+            last_valid_subj_area = cur_subj_area
+        else:
+            cur_subj_area = last_valid_subj_area
+
         for j in range(len(row)):
             for tutor in tutors:
                 if tutor.subjects:
@@ -40,13 +45,14 @@ def write_shift_subjects(ws, tutors):
                         for tutor_shift in tutor.shifts:
                             # Round down to nearest multiple of the number of
                             # shifts to get the index of the current day.
-                            if (i>1 and j>0):
-                                day_col = ((j+2) // len(all_shifts)) * len(all_shifts) - 1
-                                if (str(tutor_subj) == row[0].value
+                            if (i>1 and j>1):
+                                day_col = ((j+2) // len(all_shifts)) * len(all_shifts)
+
+                                if (tutor_subj.name == last_valid_subj_area
+                                    and tutor_subj.number == row[1].value
                                     and tutor_shift.day == ws.cell(row=1, column=day_col).value
-                                    and tutor_shift.name == ws.cell(row=2, column=j+1).value):
+                                    and tutor_shift.name == ws.cell(row=2, column=j+2).value):
                                     row[j].value = 'X'
-                            # FIXME: set subj number to '(All)' when initializing Subjects
 
 
     # Write data
