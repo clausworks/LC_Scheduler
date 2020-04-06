@@ -122,8 +122,6 @@ def read_name_subjects(ws):
             name = last_valid_name
         subject_area = row[1]
         numbers = parse_csv_list(row[2])
-        if subject_area == "DFST":
-            print(numbers)
         data[name] = []
         if numbers:
             for cur_number in numbers:

@@ -5,22 +5,46 @@ from tutor import Tutor
 from collectors import read_name_shifts, read_name_subjects
 from generators import write_shift_names, write_shift_subjects, write_subject_names
 from utils import get_writing_tutors, get_nonwriting_tutors, get_all_subjects_dict
+import os
+import sys
 
 def main():
     wb_filename = 'schedule.xlsx'
-    wb = load_workbook(filename=wb_filename, read_only=True)
+    try:
+        # determine if application is a script file or frozen exe
+        if getattr(sys, 'frozen', False):
+            application_path = os.path.dirname(sys.executable)
+        elif __file__:
+            application_path = os.path.dirname(__file__)
+        wb_path = os.path.join(application_path, wb_filename)
+        wb = load_workbook(filename=wb_path, read_only=True)
+    except FileNotFoundError:
+        print('-'*80)
+        print('The Excel workbook schedule.xlsx could not be loaded.')
+        print('Please make sure to name the file you want to use "schedule.xlsx"')
+        print('-'*80)
+        return
 
     err_file = open('ERRORS.txt', 'w')  # Clear/create error file.
 
     # Read data into dictionaries.
-    name_shifts = read_name_shifts(wb['Tutor Schedule'])
-    name_subjects = read_name_subjects(wb['Subjects'])
+    try:
+        name_shifts = read_name_shifts(wb['Tutor Schedule'])
+        name_subjects = read_name_subjects(wb['Subjects'])
+    except KeyError:
+        print('-'*80)
+        print('The workbook schedule.xlsx is missing the following worksheets:')
+        if 'Tutor Schedule' not in wb:
+            print('\tTutor Schedule')
+        if 'Subjects' not in wb:
+            print('\tSubjects')
+        print('-'*80)
+        return
 
     err_output = []
     for name in name_subjects:
         if name not in name_shifts:
             err_output.append(name)
-            print('MISSING NAME: ', name)
     if err_output:
         err_file = open('ERRORS.txt', 'a')
         print('The following tutors have subjects associated with their names', file=err_file)
@@ -100,8 +124,12 @@ def main():
     new_wb.create_sheet(ws_subjects_name)
     write_subject_names(new_wb[ws_subjects_name], nonwriting_tutors)
 
-    new_wb.save('GENERATED.xlsx')
-    print('Done.')
+    new_wb.save('Generated Schedules.xlsx')
+    print('-'*80)
+    print('The new schedules have been successfully generated.')
+    print('You can locate them as worksheets in the Generated Schedules workbook.')
+    print('-'*80)
 
 if __name__ == '__main__':
     main()
+    input('\nPress ENTER to close this window.')
