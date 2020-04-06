@@ -30,10 +30,10 @@ def write_shift_names(ws, tutors):
             for tutor in tutors:
                 for tutor_shift in tutor.shifts:
                     if cur_shift == tutor_shift.name and cur_day == tutor_shift.day:
-                        if (tutor.fname + ' ' + tutor.lname[:1]) in str(ws.cell(row=i+2, column=j+2).value):
-                            print('Duplicate:', tutor.fname + ' ' + tutor.lname[:1])
-                            for x in tutor.shifts:
-                                print(x)
+                        # if (tutor.fname + ' ' + tutor.lname[:1]) in str(ws.cell(row=i+2, column=j+2).value):
+                        #     print('Duplicate:', tutor.fname + ' ' + tutor.lname[:1])
+                        #     for x in tutor.shifts:
+                        #         print(x)
                         if ws.cell(row=i+2, column=j+2).value:
                             ws.cell(row=i+2, column=j+2).value += (tutor.fname + ' '
                                     + tutor.lname[:1] + '.\n')
