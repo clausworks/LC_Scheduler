@@ -2,3 +2,6 @@ __pycache__/
 *.xlsx
 ._*
 *.txt
+build/
+dist/
+*.spec
