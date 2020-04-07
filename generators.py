@@ -1,6 +1,7 @@
 from utils import get_all_shifts, get_all_subjects_dict
 from tutor import Shift
 from openpyxl.styles import Font, Alignment
+from openpyxl.utils import get_column_letter
 
 
 def write_shift_names(ws, tutors):
@@ -15,7 +16,11 @@ def write_shift_names(ws, tutors):
         ws.cell(row=1, column=j+2).value = day
         ws.cell(row=1, column=j+2).font = Font(bold=True)
         ws.cell(row=1, column=j+2).alignment = Alignment(horizontal='center', vertical='center')
-    ws.row_dimensions[1].width = 10
+    ws.column_dimensions['A'].width = 6
+
+
+    for j in range(len(days)):
+        ws.column_dimensions[get_column_letter(j+2)].width = 12
 
 
     # Place names.
@@ -51,20 +56,27 @@ def write_shift_subjects(ws, tutors):
     all_shifts = get_all_shifts(tutors)
     all_subjects = get_all_subjects_dict(tutors)
 
-    # Write header column (cell coordinates: row=i,col=j)
+    # Note: don't to any case transformations on header rows/columns. This
+    # will mess everything up.
 
     # Write header at top.
     j = 3 # Column index for current cell.
     for cur_day in Shift.DAYS:
         ws.cell(row=1, column=j).value = cur_day  # DAY
+        ws.merge_cells(start_row=1, start_column=j,
+                       end_row=1, end_column=j+len(all_shifts)-1)
+        ws.cell(row=1, column=j).alignment = Alignment(horizontal='center')
+        ws.cell(row=1, column=j).font = Font(bold=True)
         for cur_shift in all_shifts:
             ws.cell(row=2, column=j).value = cur_shift  # Shift N
+            ws.cell(row=2, column=j).alignment = Alignment(horizontal='center')
             j += 1
 
     # Write header on left side.
     i = 3  # Row index for current subject
     for subj_area,nums in all_subjects.items():
         ws.cell(row=i, column=1).value = subj_area
+        ws.cell(row=i, column=1).font = Font(bold=True)
         for m,cur_num in enumerate(nums):
             ws.cell(row=i, column=2).value = cur_num
             i += 1
@@ -86,13 +98,13 @@ def write_shift_subjects(ws, tutors):
                             # Round down to nearest multiple of the number of
                             # shifts to get the index of the current day.
                             if (i>1 and j>1):
-                                day_col = ((j+2) // len(all_shifts)) * len(all_shifts)
-
+                                day_col = ((j+1) // len(all_shifts)) * len(all_shifts)
                                 if (tutor_subj.name == last_valid_subj_area
                                     and tutor_subj.number == row[1].value
                                     and tutor_shift.day == ws.cell(row=1, column=day_col).value
                                     and tutor_shift.name == ws.cell(row=2, column=j+2).value):
                                     row[j].value = 'X'
+                                    row[j].alignment = Alignment(horizontal='center')
 
 
 def write_subject_names(ws, tutors):
