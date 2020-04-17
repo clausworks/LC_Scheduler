@@ -4,5 +4,6 @@ __pycache__/
 *.txt
 build/
 dist/
+support_docs/
 *.spec
 Instructions for Schedule Converter.docx
